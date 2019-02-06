@@ -1,29 +1,13 @@
-from router import Router
-from jinja2 import Template
-from utilities import get_view
-from response import Response
-import csv
+from classes.router import Router
+from classes.response import Response
 import datetime
 
-@Router.route(r'\/hello')
+@Router.route('/')
 def index():
-  view = Template(get_view('index'))
-  body_response = view.render()
+    response = Response('index')
+    return response
 
-  response = Response()
-  response.status = 200
-  response.body = body_response
-
-  return response
-
-
-@Router.route(r'\/time')
+@Router.route('/time')
 def time():
-  view = Template(get_view('time'))
-  body_response = view.render(date=datetime.datetime.now())
-
-  response = Response()
-  response.status = 200
-  response.body = body_response
-
-  return response
+    response = Response('time', {'time': datetime.datetime.now()})
+    return response
