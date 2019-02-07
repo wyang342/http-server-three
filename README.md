@@ -10,43 +10,38 @@ In this challenge, we are going to create some more functionality on our site to
 ## Release 0 - All Facts
 Our routes are following [RESTful Routing](https://medium.com/@atingenkay/restful-routes-what-are-they-8fe221521bb) patterns. Right now we are focusing on creating a `/facts` page that will give me a list of all the facts with a URL link to each individual fact. 
 
+The data we've got in the CSV file needs to be read into a `Fact` class and displayed out to the page. Let's start with creating an HTML template for all these facts:
 
-TODO: Create a Fact class, read all of the Facts from CSV and make it a huge array. Maybe class method?
+```html
+# templates/all_facts.html
+<!DOCTYPE html>
+<html>
 
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>All Facts</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
+<body>
+  <h1> All Facts </h1>
+  <ul>
+  {% for fact in facts %} 
+    <li> <a href="/facts/{{fact.id}}"> Fact #{{fact.id}} </a> </li>
+  {% endfor %}
+  </ul>
+</body>
 
-, we are going to add a new route that will allow the client to request a fact from a list of random facts we will have stored in a CSV file. The user can request a fact based on a number passed in the url. For example, `/facts/22` will respond with the 22nd fact in our CSV file. 
+</html>
+```
+The `{% %}` is when you want to run Python code but not interpolate it. `{{ }}` is for interpolating Python code. Next, let's register the URL in our controller:
 
-First, we'll add a route to our `controller.py` file. In that route, we write some code that reads the number from the URL, looks up the correct fact in the CSV file, then creates a response containing that fact. We'll also want to create a new `Jinja2` template to display the fact.
-
-Let's start with the logic in the controller:
-
-```Python
-#controller.py
-from classes.router import Router
-from classes.response import Response
-import datetime
-import re 
-import csv 
-
-@Router.route(r'^/$')
-def index(_request):
-    response = Response('index')
-    return response
-
-@Router.route('/time')
-def time(_request):
-    response = Response('time', {'time': datetime.datetime.now()})
-    return response
-
-@Router.route(r'\/facts\/(\d+)')
-def fact(request):
-    fact_id = re.match(r'\/facts\/(\d+)', request['uri']).group(1)
-    csv_file = csv.reader(open('facts.csv', "r"))
-    for row in csv_file:
-        if row[0] == fact_id:
-            fact = row 
-    response = Response('fact', {'fact': fact})
+```python
+# controller.py
+@Router.route('/facts')
+def facts(_request):
+    response = Response('all_facts', {'facts': Fact.all_facts()})
     return response
 ```
 
@@ -73,15 +68,45 @@ class Router:
     return 'HTTP/1.1 404 Not Found \r\n'
 ```
 
+
+Finally, create a `Fact` class on your own. Here are the specs:
+- It must take in an ID and fact as instance variables
+- It that has a class method called `all_facts` which returns an array of `Fact` objects.
+- You've done this before in School Interface. You can figure this out!
+
+By the end of this, you should be able to go to `/facts` and see a list of facts with URLs to individual facts. We'll build this next.
+
+## Release 1: GET-ing individual facts
+We are going to add a new route that will allow the client to request a fact from a list of random facts we will have stored in a CSV file. The user can request a fact based on a number passed in the url. For example, `/facts/22` will respond with the 22nd fact in our CSV file. 
+
+First, we'll add a route to our `controller.py` file. In that route, we write some code that reads the number from the URL, looks up the correct fact in the CSV file, then creates a response containing that fact. We'll also want to create a new `Jinja2` template to display the fact.
+
+Let's start with the logic in the controller:
+
+```Python
+#controller.py
+...
+@Router.route(r'\/facts\/(\d+)')
+def fact(request):
+    fact_id = re.match(r'\/facts\/(\d+)', request['uri']).group(1)
+    csv_file = csv.reader(open('facts.csv', "r"))
+    for row in csv_file:
+        if row[0] == fact_id:
+            fact = row 
+    response = Response('fact', {'fact': fact})
+    return response
+```
+
 We've added a bunch of regex into our code. The thing we need to pay attention to most is finding `fact_id`: we want to grab the fact id from the URL and match it with a record in the database. We create a `Response` object from there and then feed it into a `fact` template with a dictionary of variables to be interpolated.
 
 Create a new `templates/fact.html` to display our fact. By the end of this, you should be able to go to and see the following:
 - http://localhost:8888/ -> Hello!
 - http://localhost:8888/time -> The current time is INSERT_CURRENT_TIME
+- http://localhost:8888/facts -> A list of all the facts with links to those individual facts
 - http://localhost:8888/facts/:id -> The fact with the id you pass in the URL
 
 
-## Release 1 - POSTing New Facts
+## Release 2 - POSTing New Facts
 
 The last 'feature' we are going to add is the ability to `POST` a new fact. Here's the workflow:
 - The user will send a `GET` request to our server for an HTML form
@@ -123,9 +148,18 @@ def new_fact(_request):
   response = Response('form')
 ```
 
-Also hook this up in `router.py` following what we've done so far. Ensure you are about to view the form before moving forward.
+Ensure you are about to view the form before moving forward.
 
-Next, we want to fill out the form and have our data POST somewhere. This `POST` route will doing a little more. When the client hits submit on the form, the data will get fed into `controller.py` that parses out the data that the user put in. From there, it'll calculate the ID number for the new fact and put it inside the CSV file. We'll get you started by getting the data from the request and you are in charge of inserting it into the CSV file with the right ID. 
+Next, we want to fill out the form and have our data POST to `controller.py`. The `controller.py` will hit a route specific to `/facts` POST (not GET) and parse the data you get in. We'll get you started and it's your job to save it into the CSV file. Make sure you keep track of the last ID number and increment it each time. By the end of this, you should be able to create new records into your CSV file.
+
+```python
+# controller.py
+@Router.route(r'\/facts', 'POST')
+def add_fact(request):
+	all_facts = csv.reader(open('facts.csv', 'r'))
+  # your code here
+	return f'HTTP/1.1 303 See Other\r\nLocation: http://localhost:8888/facts/{new_fact_number}'
+```
 
 ## Conclusion 
-We've really only scratched the surface here. If you want to expand your learning you can look into how to respond with different formats of data (JSON?) depending on the `accepts` header. If you found this HTTP project tedious, that's okay - we are just learning how to combine all of our skills into this small project. Django, React, and most frameworks take care of all of this for you!
+We've really only scratched the surface - if you found this HTTP project tedious, that's okay! We are just learning how to combine all of our skills into this small project. Django, React, and most frameworks take care of all of this for you!
