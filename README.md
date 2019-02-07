@@ -1,7 +1,7 @@
 # HTTP Server Three
 So far our site is pretty boring. It returns 'Hello World' when you make a GET request to `/` and when you make a GET request to `/time`, it returns the time. We basically built an unnecessary digital watch. But we learned so much! Still, in order to explore HTTP servers in more depth, we'll need to add some new functionality that is slightly more robust. 
 
-In this challenge, we are going to create some more functionality on our site to teach us about HTTP servers and give us a precursor to Django! Specifically, we're going to create 3 routes:
+In this challenge, we are going to create some more functionality on our site to teach us about HTTP servers and give us a precursor to Django! Specifically, we're going to create 4 routes:
 - `/facts` (GET) -> this will return all the facts on our `facts.csv` file in bullet form with URLs to lead us to...
 - `/facts/:id` -> this will find the fact with the ID number in the CSV file and put it out to the screen
 - `/facts/new` -> this will take us to a form to create a new fact in the database
