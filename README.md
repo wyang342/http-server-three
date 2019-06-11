@@ -1,27 +1,23 @@
 # HTTP Server Three
-So far our site is pretty boring. It returns 'Hello World' when you make a GET request to `/` and when you make a GET request to `/time`, it returns the time. We basically built an unnecessary digital watch. But we learned so much! Still, in order to explore HTTP servers in more depth, we'll need to add some new functionality that is slightly more robust. 
+Our site is boring. It returns 'Hello World' when you make a GET request to `/` and returns the time when you make a GET request to `/time`. We basically built [What time is it right now](https://www.whattimeisitrightnow.com/). But we learned so much! Still, in order to explore HTTP servers in more depth, we'll need to add some new functionality that is slightly more robust. 
 
-In this challenge, we are going to create some more functionality on our site to teach us about HTTP servers and give us a precursor to Django! Specifically, we're going to create 4 routes:
+In this challenge, we are going to create some more functionality on our site to teach us about HTTP servers and give us a precursor to Django. Specifically, we're going to create 4 routes:
 - `/facts` (GET) -> this will return all the facts on our `facts.csv` file in bullet form with URLs to lead us to...
-- `/facts/:id` -> this will find the fact with the ID number in the CSV file and put it out to the screen
-- `/facts/new` -> this will take us to a form to create a new fact in the database
+- `/facts/:id` (GET) -> this will find the fact with the ID number in the CSV file and put it out to the screen
+- `/facts/new` (GET) -> this will take us to a form to create a new fact in the database
 - `/facts` (POST) -> this will save the contents of the form into the database
 
 ## Release 0 - All Facts
-Our routes are following [RESTful Routing](https://medium.com/@atingenkay/restful-routes-what-are-they-8fe221521bb) patterns. Right now we are focusing on creating a `/facts` page that will give me a list of all the facts with a URL link to each individual fact. 
+Our routes are following [RESTful Routing](https://medium.com/@atingenkay/restful-routes-what-are-they-8fe221521bb) patterns. Right now we are focusing on creating a `/facts` page that will give me a list of all the facts with a URL link to each individual fact.
 
-The data we've got in the CSV file needs to be read into a `Fact` class and displayed out to the page. Let's start with creating an HTML template for all these facts:
+Let's start with creating an HTML template for all these facts in `templates/all_facts.html`:
 
 ```html
-# templates/all_facts.html
 <!DOCTYPE html>
 <html>
 
 <head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>All Facts</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
@@ -38,7 +34,20 @@ The data we've got in the CSV file needs to be read into a `Fact` class and disp
 The `{% %}` is when you want to run Python code but not interpolate it. `{{ }}` is for interpolating Python code. Next, let's register the URL in our controller:
 
 ```python
-# controller.py
+from classes.router import Router
+from classes.response import Response
+import datetime
+
+@Router.route('/')
+def index(_request):
+    response = Response('index')
+    return response
+
+@Router.route('/time')
+def time(_request):
+    response = Response('time', {'time': datetime.datetime.now()})
+    return response
+
 @Router.route('/facts')
 def facts(_request):
     response = Response('all_facts', {'facts': Fact.all_facts()})
@@ -63,16 +72,14 @@ class Router:
   def process(self, request):
     parsed_request = request.parsed_request
     for route in self.routes:
-      if re.search(route['path'], parsed_request['uri'])  and route['method'].lower() == parsed_request['method'].lower():
+      if re.fullmatch(route['path'], parsed_request['uri'])  and route['method'].lower() == parsed_request['method'].lower():
         return route['function'](parsed_request)
     return 'HTTP/1.1 404 Not Found \r\n'
 ```
 
-
-Finally, create a `Fact` class on your own. Here are the specs:
-- It must take in an ID and fact as instance variables
-- It that has a class method called `all_facts` which returns an array of `Fact` objects.
-- You've done this before in School Interface. You can figure this out!
+You'll notice that we have a `Fact` class in `controller.py` and that we have a `facts.csv` file. Let's read the data in `facts.csv` into the `Fact` class. Here are some specs:
+- `Fact` is initialized with the headers of `facts.csv`
+- `Fact` has a class method called `all_facts` which reads the `facts.csv` and returns an array of `Fact` objects
 
 By the end of this, you should be able to go to `/facts` and see a list of facts with URLs to individual facts. We'll build this next.
 
