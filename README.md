@@ -77,7 +77,7 @@ class Router:
     return 'HTTP/1.1 404 Not Found \r\n'
 ```
 
-You'll notice that we have a `Fact` class in `controller.py` and that we have a `facts.csv` file. Let's read the data in `facts.csv` into the `Fact` class. Here are some specs:
+Notice that we are calling on a `Fact` class in our new route in `controller.py`. This class has not been written yet. Create a new file and define a `Fact` class that will read from the `facts.csv` file. . This will be similar to how we read data from a csv and created Student and Staff objects during the School Interface Challenge. Here are some specs:
 - `Fact` is initialized with the headers of `facts.csv`
 - `Fact` has a class method called `all_facts` which reads the `facts.csv` and returns an array of `Fact` objects
 
@@ -106,7 +106,7 @@ def fact(request):
 
 We've added a bunch of regex into our code. The thing we need to pay attention to most is finding `fact_id`: we want to grab the fact id from the URL and match it with a record in the database. We create a `Response` object from there and then feed it into a `fact` template with a dictionary of variables to be interpolated.
 
-Create a new `templates/fact.html` to display our fact. By the end of this, you should be able to go to and see the following:
+Create a new `templates/fact.html` to display our fact. By the end of this, you should be able to visit the following urls:
 - http://localhost:8888/ -> Hello!
 - http://localhost:8888/time -> The current time is INSERT_CURRENT_TIME
 - http://localhost:8888/facts -> A list of all the facts with links to those individual facts
@@ -119,12 +119,15 @@ The last 'feature' we are going to add is the ability to `POST` a new fact. Here
 - The user will send a `GET` request to our server for an HTML form
 - Our server will send back the form
 - The user receives the form and fills it out with a random fact
+- The form info is sent back to the server 
+- Our server parses the fact data from the request 
 - Our server will write the new fact to our CSV file
+- The server returns a redirect to a page that displays the new fact. 
 
 Before we do any of that, we'll have to add the ability to deal with params to our `Request` class. 
 
 #### Query Params
-Params can be sent in two ways: via a GET request and via a POST request. Query params are sent as part of the url `/users/search?name=thor&city=chicago` in GET requests. The question mark indicates the start of the params string. From there, key/value pairs are matched with `=`. Each individual key value pair is separated by `&`.
+Params can be sent in two ways depending on whether you are sending a a GET request or a POST request. Query params are sent as part of the url `/users/search?name=thor&city=chicago` in GET requests. The question mark indicates the start of the params string. From there, key/value pairs are matched with `=`. Each individual key value pair is separated by `&`.
 
 More often, params are sent via POST requests. We're going to create a route containing a form and collect the params upon submission.
 
@@ -152,12 +155,12 @@ We'll need to add a new route to our `controller.py` for delivering the form to 
 ```python 
 @Router.route(r'\/facts\/new')
 def new_fact(_request):
-  response = Response('form')
+  return response = Response('form')
 ```
 
-Ensure you are about to view the form before moving forward.
+Ensure you are can visit `http://localhost:8888/facts/new` and view the form before moving forward.
 
-Next, we want to fill out the form and have our data POST to `controller.py`. The `controller.py` will hit a route specific to `/facts` POST (not GET) and parse the data you get in. We'll get you started and it's your job to save it into the CSV file. Make sure you keep track of the last ID number and increment it each time. By the end of this, you should be able to create new records into your CSV file.
+Next, we want to fill out the form and have our data sent to our backend . The `controller.py` will hit a route specific to `/facts` POST (not GET) and parse the data you get in. We'll get you started, but it's your job to save it into the CSV file. Make sure you keep track of the last ID number and increment it each time. By the end of this, you should be able to create new records into your CSV file.
 
 ```python
 # controller.py
