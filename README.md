@@ -8,7 +8,7 @@ In this challenge, we are going to create some more functionality on our site to
 - `/facts` (POST) -> this will save the contents of the form into the database
 
 ## Release 0 - All Facts
-Our routes are following [RESTful Routing](https://medium.com/@atingenkay/restful-routes-what-are-they-8fe221521bb) patterns. Right now we are focusing on creating a `/facts` page that will give me a list of all the facts with a URL link to each individual fact.
+The routes are above follow [RESTful Routing](https://medium.com/@atingenkay/restful-routes-what-are-they-8fe221521bb) patterns. Let's create a `/facts` - a page that will give me a list of all the facts with a URL link to each individual fact.
 
 Let's start with creating an HTML template for all these facts in `templates/all_facts.html`:
 
@@ -31,6 +31,7 @@ Let's start with creating an HTML template for all these facts in `templates/all
 
 </html>
 ```
+
 The `{% %}` is when you want to run Python code but not interpolate it. `{{ }}` is for interpolating Python code. Next, let's register the URL in our controller:
 
 ```python
@@ -77,7 +78,7 @@ class Router:
     return 'HTTP/1.1 404 Not Found \r\n'
 ```
 
-Notice that we are calling on a `Fact` class in our new route in `controller.py`. This class has not been written yet. Create a new file and define a `Fact` class that will read from the `facts.csv` file. . This will be similar to how we read data from a csv and created Student and Staff objects during the School Interface Challenge. Here are some specs:
+Notice that we are calling on a `Fact` class in our new route in `controller.py`. This class has not been written yet. Create `classes/fact.py` and define a `Fact` class that will read from the `facts.csv` file. This will be similar to how we read data from a csv and created Student and Staff objects during the School Interface Challenge. Here are some specs:
 - `Fact` is initialized with the headers of `facts.csv`
 - `Fact` has a class method called `all_facts` which reads the `facts.csv` and returns an array of `Fact` objects
 
@@ -92,6 +93,7 @@ Let's start with the logic in the controller:
 
 ```Python
 #controller.py
+import re
 ...
 @Router.route(r'\/facts\/(\d+)')
 def fact(request):
@@ -99,7 +101,7 @@ def fact(request):
     csv_file = csv.reader(open('facts.csv', "r"))
     for row in csv_file:
         if row[0] == fact_id:
-            fact = row 
+            fact = Fact(row[0], row[1])
     response = Response('fact', {'fact': fact})
     return response
 ```
@@ -148,6 +150,7 @@ First, let's create a simple HTML form in our `templates` directory. If you're n
   </body>
 </html>
 ```
+
 We set our form up with an input for a new fact and a submit button. We set the action attribute to `/facts` and the http method to `POST`. Notice that we set the `name` attribute on our input to `fact`. This is what the key will get set to when the new fact gets passed in the request body. 
 
 We'll need to add a new route to our `controller.py` for delivering the form to the user.
