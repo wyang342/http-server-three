@@ -4,7 +4,7 @@ import controller
 import socket
 
 # create a server listening on port 8888
-HOST, PORT = 'localhost', 8887
+HOST, PORT = 'localhost', 8888
 
 listen_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 listen_socket.bind((HOST, PORT))
