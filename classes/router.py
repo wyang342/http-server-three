@@ -1,3 +1,4 @@
+import re
 class Router:
   routes = []
 
@@ -12,6 +13,6 @@ class Router:
   def process(self, request):
     parsed_request = request.parsed_request
     for route in self.routes:
-      if route['path'] == parsed_request['uri'] and route['method'].lower() == parsed_request['method'].lower():
-        return route['function']()
+      if re.fullmatch(route['path'], parsed_request['uri']) and route['method'].lower() == parsed_request['method'].lower():
+        return route['function'](parsed_request)
     return 'HTTP/1.1 404 Not Found \r\n'
